@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Écoute et achète ma musique.">
+<title>Nom de l'artiste — Musique</title>
+<style>
+:root{--bg:#f7f5f2;--fg:#16141a;--card:#fff;--mut:#6b6674;--acc:#7c3aed;--bar:#e4e0ea;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0d14;--fg:#f3f0f8;--card:#1a1722;--mut:#9a94a8;--acc:#a78bfa;--bar:#2c2738}}
+:root[data-theme="dark"]{--bg:#0f0d14;--fg:#f3f0f8;--card:#1a1722;--mut:#9a94a8;--acc:#a78bfa;--bar:#2c2738}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:32px 20px 56px}
+h1{font-size:clamp(1.8rem,6vw,2.4rem);margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 28px}
+h2{font-size:1.1rem;margin:0 0 12px}
+.track{content-visibility:auto;contain-intrinsic-size:auto 140px;background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;display:grid;grid-template-columns:64px 1fr 44px;gap:12px 14px;align-items:center}
+.cover{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--acc),#ec4899) center/cover}
+.t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m{color:var(--mut);font-size:.85rem}
+.prev .m::after{content:" · extrait terminé, achète pour tout écouter"}
+.err .m::after{content:" · indisponible"}
+.bar{height:4px;border-radius:2px;background:var(--bar);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--acc);transform:scaleX(0);transform-origin:left;will-change:transform}
+.play{border:0;background:var(--acc);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1rem;cursor:pointer;touch-action:manipulation}
+.sell{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.price{font-weight:700}
+.buy{display:inline-block;padding:10px 18px;border-radius:999px;background:var(--acc);color:#fff;text-decoration:none;font-weight:600;font-size:.9rem}
+.buy{border:0;cursor:pointer;font:inherit;font-weight:600;font-size:.9rem;touch-action:manipulation}
+.album{margin-top:24px;border:2px solid var(--acc)}
+dialog{border:0;border-radius:20px;padding:22px;width:min(92vw,400px);background:var(--card);color:var(--fg)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h3{margin:0 0 2px}
+.opts{display:grid;gap:10px;margin:16px 0}
+.opt{padding:12px 14px;border-radius:12px;border:2px solid var(--bar);background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--acc)}
+.num{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:12px;background:var(--bg);margin-bottom:12px;font-weight:700}
+.num button{border:0;background:var(--acc);color:#fff;border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer}
+.row{display:flex;gap:10px;margin-top:8px}
+.row .buy{flex:1;text-align:center}
+.ghost{background:transparent!important;color:var(--fg)!important;border:1px solid var(--bar)!important}
+.hint{color:var(--mut);font-size:.82rem;margin:0 0 10px}
+.play:focus-visible,.buy:focus-visible,.links a:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.links a{padding:10px 16px;border-radius:999px;background:var(--card);color:var(--fg);text-decoration:none;font-size:.9rem;border:1px solid var(--acc)}
+#admin{margin-top:28px;background:var(--card);border-radius:16px;padding:14px}
+#admin summary{font-weight:700;cursor:pointer}
+.fs{border:1px solid var(--bar);border-radius:12px;margin:12px 0;padding:12px;display:grid;gap:8px}
+.fs input[type=text],.fs input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--bar);background:var(--bg);color:var(--fg);font:inherit}
+.fs label{font-size:.82rem;color:var(--mut);display:grid;gap:4px}
+.ok{color:var(--acc);font-size:.8rem}
+footer{margin-top:32px;color:var(--mut);font-size:.8rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Nom de l'artiste</h1>
+<p class="sub">Ma musique, mes sons.</p>
+<h2>Titres</h2>
+<section id="list" aria-label="Liste des titres"></section>
+<section id="album" aria-label="Album complet"></section>
+<nav class="links" id="links" aria-label="Plateformes"></nav>
+<details id="admin" hidden><summary>Espace artiste</summary><div class="body"></div></details>
+<footer>© 2026 Nom de l'artiste</footer>
+</main>
+<script type="application/json" id="data">{"tracks":[{"t":"Titre 1","m":"Single · 2026","src":"","cover":"","price":500},{"t":"Titre 2","m":"Single · 2026","src":"","cover":"","price":500},{"t":"Titre 3","m":"Single · 2025","src":"","cover":"","price":500}],"album":{"t":"Album complet","m":"Tous les titres","cover":"","price":1000}}</script>
+<script>
+(function(){
+"use strict";
+/* ====== À MODIFIER ====== */
+var ARTIST="Nom de l'artiste";
+var CUR="FCFA";          /* devise : FCFA, €, $ ... */
+var PREVIEW=30;          /* secondes d'extrait avant achat (0 = titre complet) */
+var D=JSON.parse(document.getElementById("data").textContent),TRACKS=D.tracks,ALBUM=D.album;
+var WA="228XXXXXXXX";   /* ton numéro WhatsApp, indicatif sans + (ex : 228...) */
+var PAY=[
+ {id:"yas",label:"Yas (Mixx by Yas)",num:"90 00 00 00"},
+ {id:"moov",label:"Moov Money",num:"99 00 00 00"}
+];
+var LINKS=[["Apple Music","#"],["Spotify","#"],["YouTube","#"],["TikTok","#"]];
+/* ======================== */
+
+var $=function(id){return document.getElementById(id)};
+var money=function(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ")+" "+CUR};
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt)e.textContent=txt;return e}
+function sell(item,label){
+ var s=el("div","sell"),p=el("span","price",money(item.price));
+ var b=el("button","buy",label||"Acheter");b.type="button";
+ b.addEventListener("click",function(){openPay(item)});
+ s.append(p,b);return s;
+}
+function card(x,withPlay,i){
+ var r=el("article","track"),c=el("div","cover");
+ if(x.cover)c.style.backgroundImage="url("+x.cover+")";
+ var b=el("div"),f=el("i"),p=el("div","bar");
+ p.appendChild(f);b.append(el("div","t",x.t),el("div","m",x.m),p);
+ r.append(c,b);
+ var btn=null;
+ if(withPlay){
+  btn=el("button","play","▶");btn.type="button";btn.dataset.i=i;
+  btn.setAttribute("aria-label","Écouter "+x.t);r.appendChild(btn);
+ }else r.appendChild(el("span"));
+ if(x.price)r.appendChild(sell(x,withPlay?"Acheter":"Acheter l'album"));
+ return {r:r,btn:btn,bar:f};
+}
+
+var rows=[],frag=document.createDocumentFragment();
+TRACKS.forEach(function(x,i){var o=card(x,true,i);rows.push(o);frag.appendChild(o.r)});
+$("list").appendChild(frag);
+var al=card(ALBUM,false);al.r.classList.add("album");$("album").appendChild(al.r);
+
+var nav=$("links");
+LINKS.forEach(function(l){
+ var a=el("a","",l[0]);a.href=l[1];a.target="_blank";a.rel="noopener noreferrer";nav.appendChild(a);
+});
+
+/* Paiement Mobile Money */
+var dlg=el("dialog"),sel=PAY[0],item=null;
+document.body.appendChild(dlg);
+function openPay(it){
+ item=it;sel=PAY[0];dlg.textContent="";
+ dlg.appendChild(el("h3","",it.t));
+ dlg.appendChild(el("div","m","Montant : "+money(it.price)));
+ var o=el("div","opts"),n=el("div","num"),nv=el("span"),cp=el("button","","Copier");
+ cp.type="button";n.append(nv,cp);
+ function show(){nv.textContent=sel.num;
+  [].forEach.call(o.children,function(c,k){c.setAttribute("aria-pressed",PAY[k]===sel)})}
+ PAY.forEach(function(m){
+  var b=el("button","opt","Payer avec "+m.label);b.type="button";
+  b.addEventListener("click",function(){sel=m;show()});o.appendChild(b);
+ });
+ cp.addEventListener("click",function(){
+  var t=sel.num.replace(/\s/g,"");
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){cp.textContent="Copié"}).catch(function(){});
+ });
+ dlg.append(o,n,el("p","hint","1. Envoie le montant à ce numéro par Mobile Money. 2. Appuie sur « J'ai payé » pour m'envoyer la preuve sur WhatsApp : je t'envoie ton titre."));
+ var r=el("div","row"),ok=el("button","buy","J'ai payé"),x=el("button","buy ghost","Fermer");
+ ok.type=x.type="button";
+ ok.addEventListener("click",function(){
+  var msg="Bonjour, j'ai payé "+money(item.price)+" via "+sel.label+" pour : "+item.t;
+  window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank","noopener");
+ });
+ x.addEventListener("click",function(){dlg.close()});
+ r.append(ok,x);dlg.appendChild(r);show();
+ dlg.showModal();
+}
+dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close()});
+
+/* Un seul lecteur audio, chargé à la demande */
+var au=new Audio();au.preload="none";
+var cur=-1;
+
+function ui(){
+ rows.forEach(function(o,i){
+  var on=i===cur&&!au.paused;
+  o.btn.textContent=on?"❚❚":"▶";
+  o.btn.setAttribute("aria-label",(on?"Pause ":"Écouter ")+TRACKS[i].t);
+  if(i!==cur)o.bar.style.transform="scaleX(0)";
+ });
+}
+function load(i){
+ if(cur>-1)rows[cur].r.classList.remove("prev");
+ cur=i;au.src=TRACKS[i].src;rows[i].r.classList.remove("err","prev");
+ if("mediaSession" in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:TRACKS[i].t,artist:ARTIST});
+}
+function toggle(i){
+ if(!TRACKS[i].src){rows[i].r.classList.add("err");return}
+ if(i===cur){au.paused?au.play().catch(fail):au.pause();return}
+ load(i);au.play().catch(fail);
+}
+function fail(){if(cur>-1)rows[cur].r.classList.add("err");ui()}
+
+$("list").addEventListener("click",function(e){
+ var b=e.target.closest(".play");if(b)toggle(+b.dataset.i);
+});
+au.addEventListener("play",ui);
+au.addEventListener("pause",ui);
+au.addEventListener("error",fail);
+au.addEventListener("ended",function(){
+ var n=cur+1;
+ if(n<TRACKS.length&&!PREVIEW){load(n);au.play().catch(fail)}else ui();
+});
+au.addEventListener("timeupdate",function(){
+ if(cur<0||!au.duration)return;
+ var lim=PREVIEW&&PREVIEW<au.duration?PREVIEW:au.duration;
+ if(PREVIEW&&au.currentTime>=lim){
+  au.pause();au.currentTime=0;rows[cur].r.classList.add("prev");
+  rows[cur].bar.style.transform="scaleX(1)";return;
+ }
+ rows[cur].bar.style.transform="scaleX("+(au.currentTime/lim)+")";
+});
+if("mediaSession" in navigator){
+ var ms=navigator.mediaSession;
+ ms.setActionHandler("play",function(){au.play()});
+ ms.setActionHandler("pause",function(){au.pause()});
+ ms.setActionHandler("nexttrack",function(){if(cur<TRACKS.length-1)toggle(cur+1)});
+ ms.setActionHandler("previoustrack",function(){if(cur>0)toggle(cur-1)});
+}
+/* ===== Espace artiste (visible uniquement par le propriétaire) ===== */
+var adm=$("admin"),body=adm.querySelector(".body");
+function mb(){return JSON.stringify(D).length/1048576}
+function readAudio(f){return new Promise(function(ok,ko){var r=new FileReader();
+ r.onload=function(){ok(r.result.replace(/^data:[^;]*;/,"data:"+(/^audio\//.test(f.type)?f.type:"audio/mpeg")+";"))};
+ r.onerror=ko;r.readAsDataURL(f)})}
+function readCover(f){return createImageBitmap(f).then(function(b){
+ var k=Math.min(1,500/Math.max(b.width,b.height)),c=document.createElement("canvas");
+ c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);
+ c.getContext("2d").drawImage(b,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.82)})}
+function field(lab,inp){var l=el("label","",lab);l.appendChild(inp);return l}
+function inp(type,val,fn){var i=el("input");i.type=type;i.value=val;i.addEventListener("input",function(){fn(i.value)});return i}
+function fileIn(accept,reader,done,note){
+ var i=el("input");i.type="file";i.accept=accept;
+ i.addEventListener("change",function(){
+  var f=i.files[0];if(!f)return;note.textContent="Chargement…";
+  reader(f).then(function(d){done(d);note.textContent="✓ "+f.name;meter()}).catch(function(){note.textContent="Fichier illisible"});
+ });return i;
+}
+var st;
+function meter(){st.textContent="Taille de la page : "+mb().toFixed(1)+" Mo / 15 Mo max"}
+function block(x,idx,isAlbum){
+ var b=el("fieldset","fs");
+ b.appendChild(el("strong","",isAlbum?"Album":"Titre "+(idx+1)));
+ b.appendChild(field("Nom",inp("text",x.t,function(v){x.t=v})));
+ b.appendChild(field("Prix ("+CUR+")",inp("number",x.price,function(v){x.price=+v||0})));
+ var n1=el("span","ok",x.cover?"✓ pochette ajoutée":"");
+ b.appendChild(field("Pochette (image)",fileIn("image/*",readCover,function(d){x.cover=d},n1)));b.appendChild(n1);
+ if(!isAlbum){
+  var n2=el("span","ok",x.src?"✓ audio ajouté":"");
+  b.appendChild(field("Audio (un extrait de 30 à 60 s suffit)",fileIn("audio/*",readAudio,function(d){x.src=d},n2)));b.appendChild(n2);
+  var d=el("button","buy ghost","Supprimer ce titre");d.type="button";
+  d.addEventListener("click",function(){D.tracks.splice(idx,1);panel()});b.appendChild(d);
+ }
+ return b;
+}
+function panel(){
+ body.textContent="";
+ body.appendChild(el("p","hint","Importe un extrait de chaque titre : le titre complet est envoyé après paiement. Les fichiers sont intégrés à la page (15 Mo max au total)."));
+ D.tracks.forEach(function(x,i){body.appendChild(block(x,i,false))});
+ var add=el("button","buy ghost","+ Ajouter un titre");add.type="button";
+ add.addEventListener("click",function(){D.tracks.push({t:"Nouveau titre",m:"Single",src:"",cover:"",price:500});panel()});
+ body.appendChild(add);
+ body.appendChild(block(D.album,0,true));
+ st=el("p","hint");body.appendChild(st);meter();
+ var msg=el("p","hint"),pub=el("button","buy","Enregistrer et publier");pub.type="button";
+ pub.addEventListener("click",function(){
+  if(mb()>15){msg.textContent="Trop lourd : retire un fichier ou utilise des extraits plus courts.";return}
+  msg.textContent="Publication…";
+  claude.use("artifact").then(function(a){
+   if(!a){msg.textContent="Indisponible ici.";return}
+   return a.publish(build());
+  }).catch(function(e){msg.textContent="Échec : "+((e&&e.code)||"erreur")});
+ });
+ body.append(pub,msg);
+}
+function build(){
+ var c=document.documentElement.cloneNode(true);
+ ["list","album","links"].forEach(function(id){c.querySelector("#"+id).textContent=""});
+ var a=c.querySelector("#admin");a.querySelector(".body").textContent="";a.setAttribute("hidden","");a.removeAttribute("open");
+ c.querySelectorAll("dialog").forEach(function(d){d.remove()});
+ c.querySelector("#data").textContent=JSON.stringify(D).replace(/</g,"\\u003c");
+ return "<!DOCTYPE html>\n"+c.outerHTML;
+}
+if(window.claude&&claude.use){
+ claude.use("user").then(function(u){if(u&&u.isOwner()){adm.hidden=false;panel()}}).catch(function(){});
+}
+})();
+</script>
+</body>
+</html>
